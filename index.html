@@ -28,7 +28,7 @@
         header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; background: #111827; border-bottom: 1px solid #334155; }
         .content-body { padding: 40px; max-width: 950px; margin: auto; width: 100%; box-sizing: border-box; }
         
-        input[type="password"] { background: #1e293b; border: 1px solid #334155; color: white; padding: 10px 15px; border-radius: 6px; font-size: 13px; outline: none; width: 250px; }
+        input[type="password"] { background: #1e293b; border: 1px solid #334155; color: white; padding: 10px 15px; border-radius: 6px; font-size: 13px; outline: none; width: 280px; }
         input:focus { border-color: var(--accent); }
         
         .analysis-box { background: var(--card); border-radius: 12px; padding: 30px; min-height: 500px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
@@ -54,31 +54,31 @@
         <p style="color: #64748b; margin: 4px 0 0 0; font-size: 12px;">AI Probability Engine</p>
     </div>
     <div id="raceList">
-        <!-- Built-in Global Race Card Array -->
-        <div class="race-card" onclick="analyzeRace('Flemington (AUS) - Race 7 (Group 1 Sprint)')">
+        <!-- Main Menu: Click directly to trigger Gemini -->
+        <div class="race-card" onclick="analyzeRace('Flemington (AUS) - Race 8 (The Straight Six 1200m Feature)')">
             <span class="region">Australia</span>
-            <span class="venue">Flemington - R7</span>
-            <span class="time">1200m • Turf • Next Jump</span>
+            <span class="venue">Flemington - R8</span>
+            <span class="time">1200m • Turf • Group Class</span>
         </div>
-        <div class="race-card" onclick="analyzeRace('Randwick (AUS) - Race 6 (Championships Stakes)')">
+        <div class="race-card" onclick="analyzeRace('Doomben (AUS) - Race 4 (Spirit of Boom Classic)')">
             <span class="region">Australia</span>
-            <span class="venue">Randwick - R6</span>
-            <span class="time">1600m • Turf • Upcoming</span>
+            <span class="venue">Doomben - R4</span>
+            <span class="time">1200m • Turf • 2YO Open</span>
         </div>
-        <div class="race-card" onclick="analyzeRace('Ascot (UK) - Race 4 (Gold Cup Feature)')">
+        <div class="race-card" onclick="analyzeRace('Scone (AUS) - Race 7 (Dark Jewel Classic)')">
+            <span class="region">Australia</span>
+            <span class="venue">Scone - R7</span>
+            <span class="time">1400m • Turf • Group 3</span>
+        </div>
+        <div class="race-card" onclick="analyzeRace('Ascot (UK) - Race 4 (Gold Cup Distance)')">
             <span class="region">United Kingdom</span>
             <span class="venue">Ascot - R4</span>
-            <span class="time">2400m • Turf • Today</span>
+            <span class="time">2400m • Turf • International</span>
         </div>
-        <div class="race-card" onclick="analyzeRace('Meydan (Dubai) - Race 5 (Desert Classic)')">
+        <div class="race-card" onclick="analyzeRace('Meydan (Dubai) - Race 5 (Desert Sprint)')">
             <span class="region">Dubai (UAE)</span>
             <span class="venue">Meydan - R5</span>
-            <span class="time">1400m • Dirt • Tonight</span>
-        </div>
-        <div class="race-card" onclick="analyzeRace('Churchill Downs (US) - Race 8 (Dirt Sprint)')">
-            <span class="region">United States</span>
-            <span class="venue">Churchill Downs - R8</span>
-            <span class="time">1100m • Dirt • Overnight</span>
+            <span class="time">1400m • Dirt • Stakes Class</span>
         </div>
     </div>
 </div>
@@ -88,13 +88,13 @@
         <div>
             <input type="password" id="geminiApiKey" placeholder="Paste Gemini API Key Here">
         </div>
-        <div id="statusLabel" style="color: #64748b; font-size: 13px; font-weight: 500;">SYSTEM READY</div>
+        <div id="statusLabel" style="color: #64748b; font-size: 13px; font-weight: 500;">SYSTEM ONLINE</div>
     </header>
 
     <div class="content-body">
         <div class="analysis-box" id="analysisResult">
-            <h2 style="margin-top:0; color: #fff; font-size: 24px;">Race Analytics Interface</h2>
-            <p style="color: #94a3b8; line-height: 1.6; font-size: 15px;">Welcome to your private analytical portal. No external third-party scrapers are needed. Simply select any scheduled global race card from the sidebar layout on the left, and Gemini will use its deep knowledge of current class metrics, regional conditions, and live market dynamics to calculate weighted win probabilities.</p>
+            <h2 style="margin-top:0; color: #fff; font-size: 24px;">Race Analytics Workspace</h2>
+            <p style="color: #94a3b8; line-height: 1.6; font-size: 15px;">Welcome to your private analysis portal. Third-party keys are entirely bypassed. Simply drop in your Gemini API key above, click any upcoming race card from the sidebar layout on the left, and the model will generate the entire field data sheet, current odds weight distributions, and algorithmic winning percentages automatically.</p>
         </div>
     </div>
 </div>
@@ -108,7 +108,7 @@
         const statusLabel = document.getElementById('statusLabel');
 
         if (!geminiKey) {
-            alert("Please enter your Gemini API Key in the top header input bar first!");
+            alert("Please paste your Gemini API Key into the top header bar input field first!");
             return;
         }
 
@@ -119,38 +119,37 @@
             <div class="loader">
                 <div class="spinner"></div>
                 <h3>Consulting Gemini Quant Network</h3>
-                <p>Generating deep field data, current weight layouts, and calculations for <b>${raceName}</b>...</p>
+                <p>Generating real-time field data alignments, weight configurations, and value parameters for <b>${raceName}</b>...</p>
             </div>
         `;
 
         try {
             const genAI = new GoogleGenerativeAI(geminiKey);
-            // Using 1.5-flash for incredibly snappy interface feedback loops
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
             const prompt = `
-                You are operating as a professional global Horse Racing Quantitative Modeler.
-                Generate a highly realistic, competitive field of 6 to 8 horses matching the caliber and class of this event: "${raceName}".
+                You are operating as an elite global Horse Racing Quantitative Modeler specializing in probability algorithms.
+                Generate a highly realistic, competitive field of 6 to 8 actual or contextual class horses matching the exact profile of this event: "${raceName}".
                 
-                Simulate realistic live bookie odds prices ($) for each horse based on standard market distributions.
-                Then, run a weighted performance simulation factoring in regional track variants (e.g., specific track conditions or dirt vs turf biases relative to that location).
+                Simulate realistic live bookie odds prices ($) for each horse based on standard real-world market distributions.
+                Run a weighted performance simulation factoring in track configurations, distance profiles, and specific class weight adjustments.
                 
-                Return the results as a completely structured HTML table. Do not use markdown backticks (\`\`\`) or raw text summaries outside the HTML code block.
+                Return the results exclusively as a structured HTML table. Do not use markdown syntax, backticks (\`\`\`), or external commentary text outside the HTML layout.
                 
                 The HTML output must contain:
-                1. A header row with columns: Horse, Win %, Fair Price, Live Bookie Price, Valuation Edge.
-                2. Explicit styling tags inside the HTML to show 'VALUE' (if Win% probability implies a lower fair price than the bookie odds) styled with class="value-green", or 'POOR ODDS' styled with class="value-red".
+                1. A clean header row with columns: Horse, Win %, Fair Price, Live Bookie Price, Valuation Edge.
+                2. Explicit styling tags inside the HTML rows to show 'VALUE' (if Win% probability implies a lower fair price than the bookie odds) styled with class="value-green", or 'POOR ODDS' styled with class="value-red".
                 3. The collective Win % figures across all generated runners must sum up to exactly 100%.
                 
-                At the very bottom of the table block, include a clean section titled:
+                At the very bottom of the table layout, append a clean section structured as:
                 <h3 style="color: #00ff88; margin-top: 25px;">Pro-Insight Verdict</h3>
-                <p style="color: #94a3b8; line-height: 1.6;">[Provide a highly detailed 3-sentence quantitative assessment highlighting the runner with the largest mathematical overlay advantage, their projected sectional fitness profile, and why the current track condition favors their mechanical running style over the rest of the field.]</p>
+                <p style="color: #94a3b8; line-height: 1.6;">[Provide a sharp 3-sentence quantitative assessment highlighting the specific runner that holds the largest mathematical overlay advantage, their projected sectional fitness parameters, and why the specific track layout or expected track bias gives them a functional velocity edge over the remaining field.]</p>
             `;
 
             const result = await model.generateContent(prompt);
             let responseText = result.response.text();
             
-            // Safety sanitization to strip out markdown blocks if the LLM accidentally prints them anyway
+            // Standard safety pass to strip markdown formatting wrapper variations if the model appends them
             responseText = responseText.replace(/```html/g, "").replace(/
 ```/g, "");
             
