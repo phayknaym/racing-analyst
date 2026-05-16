@@ -2,124 +2,223 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuantRace AU | Pure Intelligence</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuantRace Mobile</title>
     <script type="importmap">
       { "imports": { "@google/generative-ai": "https://esm.run/@google/generative-ai" } }
     </script>
     <style>
-        :root { --accent: #00ff88; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --sidebar: #0b1120; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        :root { --accent: #00ff88; --bg: #090d16; --card: #151f32; --text: #f8fafc; --sidebar: #0b1120; }
         
-        /* Sidebar layout */
-        .sidebar { width: 320px; background: var(--sidebar); border-right: 1px solid #334155; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 20px; border-bottom: 1px solid #334155; }
-        #raceList { flex: 1; overflow-y: auto; padding: 10px; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        /* Race Cards */
-        .race-card { background: var(--card); padding: 14px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
-        .race-card:hover { border-color: var(--accent); background: #24344d; }
-        .race-card .time { font-size: 12px; color: var(--accent); display: block; margin-top: 4px; }
-        .race-card .venue { font-weight: bold; display: block; color: #fff; }
-        .race-card .region { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-        /* Main Window Layout */
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
-        header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; background: #111827; border-bottom: 1px solid #334155; }
-        .content-body { padding: 40px; max-width: 950px; margin: auto; width: 100%; box-sizing: border-box; }
+        /* Top Bar Fixes for Mobile */
+        header { 
+            padding: 12px 16px; 
+            background: #111827; 
+            border-bottom: 1px solid #24344d;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .brand { color: var(--accent); margin: 0; font-size: 18px; font-weight: bold; }
+        .status { font-size: 11px; color: #64748b; letter-spacing: 0.5px; }
         
-        input[type="password"] { background: #1e293b; border: 1px solid #334155; color: white; padding: 10px 15px; border-radius: 6px; font-size: 13px; outline: none; width: 280px; }
+        input[type="password"] { 
+            background: #1e293b; 
+            border: 1px solid #334155; 
+            color: white; 
+            padding: 10px 12px; 
+            border-radius: 8px; 
+            font-size: 14px; 
+            outline: none; 
+            width: 100%;
+        }
         input:focus { border-color: var(--accent); }
+
+        /* Mobile Screen Toggle Viewports */
+        .app-body { flex: 1; position: relative; overflow: hidden; }
+        .screen { 
+            position: absolute; 
+            top: 0; left: 0; right: 0; bottom: 0; 
+            overflow-y: auto; 
+            padding: 16px;
+            display: none;
+            padding-bottom: 80px; /* Space for bottom navigation */
+        }
+        .screen.active { display: block; }
+
+        /* Mobile View Cards */
+        .race-card { 
+            background: var(--card); 
+            padding: 16px; 
+            margin-bottom: 12px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            border: 1px solid #24344d;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
+        }
+        .race-card:active { background: #1e2d44; }
+        .race-card .region { font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
+        .race-card .venue { font-size: 16px; font-weight: bold; color: #fff; margin: 4px 0; }
+        .race-card .time { font-size: 12px; color: var(--accent); }
+
+        .analysis-box { background: var(--card); border-radius: 12px; padding: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); }
+
+        /* Mobile Responsive Data Tables */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #0b1120; border-radius: 10px; overflow: hidden; font-size: 13px; }
+        th { text-align: left; color: #94a3b8; font-size: 11px; padding: 10px 8px; border-bottom: 2px solid #24344d; background: #111827; }
+        td { padding: 12px 8px; border-bottom: 1px solid #24344d; color: #e2e8f0; }
         
-        .analysis-box { background: var(--card); border-radius: 12px; padding: 30px; min-height: 500px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        
-        /* Formatted Table Styles inside output */
-        table { width: 100%; border-collapse: collapse; margin-top: 25px; background: #0f172a; border-radius: 8px; overflow: hidden; }
-        th { text-align: left; color: #94a3b8; font-size: 12px; padding: 14px 10px; border-bottom: 2px solid #334155; text-transform: uppercase; background: #1e293b; }
-        td { padding: 14px 10px; border-bottom: 1px solid #334155; font-size: 14px; }
-        tr:hover { background: #1e293b; }
-        
-        .value-green { color: #34d399; font-weight: bold; background: #065f46; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
-        .value-red { color: #f87171; font-weight: bold; background: #7f1d1d; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
-        .loader { text-align: center; color: #94a3b8; padding: 50px 0; }
-        .spinner { border: 4px solid rgba(255,255,255,0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: var(--accent); animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
+        .value-green { color: #34d399; font-weight: bold; background: #065f46; padding: 2px 6px; border-radius: 4px; font-size: 11px; display: inline-block; }
+        .value-red { color: #f87171; font-weight: bold; background: #7f1d1d; padding: 2px 6px; border-radius: 4px; font-size: 11px; display: inline-block; }
+
+        /* Bottom Tab Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 64px;
+            background: #111827;
+            border-top: 1px solid #24344d;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+        .nav-tab {
+            background: none; border: none; color: #64748b;
+            font-size: 12px; font-weight: bold;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            cursor: pointer; flex: 1; height: 100%; justify-content: center;
+        }
+        .nav-tab.active { color: var(--accent); }
+        .nav-tab span.icon { font-size: 20px; }
+
+        /* Spinner Animations */
+        .loader { text-align: center; color: #94a3b8; padding: 40px 0; }
+        .spinner { border: 3px solid rgba(255,255,255,0.1); width: 32px; height: 32px; border-radius: 50%; border-left-color: var(--accent); animation: spin 1s linear infinite; margin: 0 auto 12px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <div class="sidebar-header">
-        <h2 style="color: var(--accent); margin: 0; font-size: 22px; letter-spacing: -0.5px;">QuantRace</h2>
-        <p style="color: #64748b; margin: 4px 0 0 0; font-size: 12px;">AI Probability Engine</p>
-    </div>
-    <div id="raceList">
-        <!-- Main Menu: Click directly to trigger Gemini -->
-        <div class="race-card" onclick="analyzeRace('Flemington (AUS) - Race 8 (The Straight Six 1200m Feature)')">
-            <span class="region">Australia</span>
-            <span class="venue">Flemington - R8</span>
-            <span class="time">1200m • Turf • Group Class</span>
-        </div>
-        <div class="race-card" onclick="analyzeRace('Doomben (AUS) - Race 4 (Spirit of Boom Classic)')">
-            <span class="region">Australia</span>
-            <span class="venue">Doomben - R4</span>
-            <span class="time">1200m • Turf • 2YO Open</span>
-        </div>
-        <div class="race-card" onclick="analyzeRace('Scone (AUS) - Race 7 (Dark Jewel Classic)')">
-            <span class="region">Australia</span>
-            <span class="venue">Scone - R7</span>
-            <span class="time">1400m • Turf • Group 3</span>
-        </div>
-        <div class="race-card" onclick="analyzeRace('Ascot (UK) - Race 4 (Gold Cup Distance)')">
-            <span class="region">United Kingdom</span>
-            <span class="venue">Ascot - R4</span>
-            <span class="time">2400m • Turf • International</span>
-        </div>
-        <div class="race-card" onclick="analyzeRace('Meydan (Dubai) - Race 5 (Desert Sprint)')">
-            <span class="region">Dubai (UAE)</span>
-            <span class="venue">Meydan - R5</span>
-            <span class="time">1400m • Dirt • Stakes Class</span>
-        </div>
-    </div>
-</div>
-
-<div class="main-content">
     <header>
-        <div>
-            <input type="password" id="geminiApiKey" placeholder="Paste Gemini API Key Here">
+        <div class="header-top">
+            <span class="brand">QuantRace Mobile</span>
+            <span id="statusLabel" class="status">ONLINE</span>
         </div>
-        <div id="statusLabel" style="color: #64748b; font-size: 13px; font-weight: 500;">SYSTEM ONLINE</div>
+        <div>
+            <input type="password" id="geminiApiKey" placeholder="Enter Gemini API Key">
+        </div>
     </header>
 
-    <div class="content-body">
-        <div class="analysis-box" id="analysisResult">
-            <h2 style="margin-top:0; color: #fff; font-size: 24px;">Race Analytics Workspace</h2>
-            <p style="color: #94a3b8; line-height: 1.6; font-size: 15px;">Welcome to your private analysis portal. Third-party keys are entirely bypassed. Simply drop in your Gemini API key above, click any upcoming race card from the sidebar layout on the left, and the model will generate the entire field data sheet, current odds weight distributions, and algorithmic winning percentages automatically.</p>
+    <div class="app-body">
+        <!-- SCREEN 1: RACE LIST -->
+        <div id="listScreen" class="screen active">
+            <h3 style="margin-top:0; font-size: 16px; color: #94a3b8;">Select Meeting</h3>
+            <div class="race-card" onclick="runMobileAnalysis('Flemington (AUS) - Race 8 (The Straight Six 1200m Feature)')">
+                <span class="region">Australia</span>
+                <span class="venue">Flemington - R8</span>
+                <span class="time">1200m • Turf • Group Class</span>
+            </div>
+            <div class="race-card" onclick="runMobileAnalysis('Doomben (AUS) - Race 4 (Spirit of Boom Classic)')">
+                <span class="region">Australia</span>
+                <span class="venue">Doomben - R4</span>
+                <span class="time">1200m • Turf • 2YO Open</span>
+            </div>
+            <div class="race-card" onclick="runMobileAnalysis('Scone (AUS) - Race 7 (Dark Jewel Classic)')">
+                <span class="region">Australia</span>
+                <span class="venue">Scone - R7</span>
+                <span class="time">1400m • Turf • Group 3</span>
+            </div>
+            <div class="race-card" onclick="runMobileAnalysis('Ascot (UK) - Race 4 (Gold Cup Distance)')">
+                <span class="region">United Kingdom</span>
+                <span class="venue">Ascot - R4</span>
+                <span class="time">2400m • Turf • International</span>
+            </div>
+            <div class="race-card" onclick="runMobileAnalysis('Meydan (Dubai) - Race 5 (Desert Sprint)')">
+                <span class="region">Dubai (UAE)</span>
+                <span class="venue">Meydan - R5</span>
+                <span class="time">1400m • Dirt • Stakes Class</span>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: ANALYSIS INTERFACE -->
+        <div id="analysisScreen" class="screen">
+            <div class="analysis-box" id="analysisResult">
+                <h3 style="margin-top:0; color: #fff;">No Race Selected</h3>
+                <p style="color: #94a3b8; line-height: 1.5; font-size: 14px;">Head back to the 'Races' tab, pick a track layout, and Gemini will instantly run performance weight metrics on your screen.</p>
+            </div>
         </div>
     </div>
-</div>
+
+    <!-- Mobile Navigation Bar -->
+    <div class="bottom-nav">
+        <button id="tabList" class="nav-tab active" onclick="switchScreen('list')">
+            <span class="icon">🏇</span>
+            <span>Races</span>
+        </button>
+        <button id="tabAnalysis" class="nav-tab" onclick="switchScreen('analysis')">
+            <span class="icon">📊</span>
+            <span>Analysis</span>
+        </button>
+    </div>
 
 <script type="module">
     import { GoogleGenerativeAI } from "@google/generative-ai";
 
-    window.analyzeRace = async (raceName) => {
+    // Navigation Switcher Logic
+    window.switchScreen = (screenName) => {
+        const listScreen = document.getElementById('listScreen');
+        const analysisScreen = document.getElementById('analysisScreen');
+        const tabList = document.getElementById('tabList');
+        const tabAnalysis = document.getElementById('tabAnalysis');
+
+        if (screenName === 'list') {
+            listScreen.classList.add('active');
+            analysisScreen.classList.remove('active');
+            tabList.classList.add('active');
+            tabAnalysis.classList.remove('active');
+        } else {
+            analysisScreen.classList.add('active');
+            listScreen.classList.remove('active');
+            tabAnalysis.classList.add('active');
+            tabList.classList.remove('active');
+        }
+    };
+
+    window.runMobileAnalysis = async (raceName) => {
         const geminiKey = document.getElementById('geminiApiKey').value.trim();
         const display = document.getElementById('analysisResult');
         const statusLabel = document.getElementById('statusLabel');
 
         if (!geminiKey) {
-            alert("Please paste your Gemini API Key into the top header bar input field first!");
+            alert("Please drop your Gemini API Key into the top header first!");
             return;
         }
 
-        statusLabel.innerText = "RUNNING SIMULATIONS...";
+        // Switch screen instantly to show mobile loading behavior
+        switchScreen('analysis');
+        statusLabel.innerText = "RUNNING SIMS...";
         statusLabel.style.color = "var(--accent)";
         
         display.innerHTML = `
             <div class="loader">
                 <div class="spinner"></div>
-                <h3>Consulting Gemini Quant Network</h3>
-                <p>Generating real-time field data alignments, weight configurations, and value parameters for <b>${raceName}</b>...</p>
+                <h4 style="margin: 5px 0;">Consulting Quant Model</h4>
+                <p style="font-size: 13px; color: #64748b;">Processing variables for ${raceName}...</p>
             </div>
         `;
 
@@ -129,7 +228,7 @@
 
             const prompt = `
                 You are operating as an elite global Horse Racing Quantitative Modeler specializing in probability algorithms.
-                Generate a highly realistic, competitive field of 6 to 8 actual or contextual class horses matching the exact profile of this event: "${raceName}".
+                Generate a highly realistic, competitive field of 5 to 6 actual or contextual class horses matching this event: "${raceName}".
                 
                 Simulate realistic live bookie odds prices ($) for each horse based on standard real-world market distributions.
                 Run a weighted performance simulation factoring in track configurations, distance profiles, and specific class weight adjustments.
@@ -137,40 +236,37 @@
                 Return the results exclusively as a structured HTML table. Do not use markdown syntax, backticks (\`\`\`), or external commentary text outside the HTML layout.
                 
                 The HTML output must contain:
-                1. A clean header row with columns: Horse, Win %, Fair Price, Live Bookie Price, Valuation Edge.
-                2. Explicit styling tags inside the HTML rows to show 'VALUE' (if Win% probability implies a lower fair price than the bookie odds) styled with class="value-green", or 'POOR ODDS' styled with class="value-red".
+                1. A clean header row with columns: Horse, Win %, Fair, Live, Edge.
+                2. Explicit styling tags inside the HTML rows to show 'VALUE' styled with class="value-green", or 'POOR' styled with class="value-red".
                 3. The collective Win % figures across all generated runners must sum up to exactly 100%.
                 
-                At the very bottom of the table layout, append a clean section structured as:
-                <h3 style="color: #00ff88; margin-top: 25px;">Pro-Insight Verdict</h3>
-                <p style="color: #94a3b8; line-height: 1.6;">[Provide a sharp 3-sentence quantitative assessment highlighting the specific runner that holds the largest mathematical overlay advantage, their projected sectional fitness parameters, and why the specific track layout or expected track bias gives them a functional velocity edge over the remaining field.]</p>
+                At the very bottom of the table layout, append a clean section structured exactly as:
+                <h4 style="color: #00ff88; margin-top: 20px; margin-bottom: 8px;">Pro-Insight</h4>
+                <p style="color: #94a3b8; line-height: 1.5; font-size: 13px; margin:0;">[Provide a sharp 2-sentence quantitative evaluation pinning down the runner holding the largest value gap advantage, their fitness profile, and why the layout configuration offers them an edge.]</p>
             `;
 
             const result = await model.generateContent(prompt);
             let responseText = result.response.text();
             
-            // Standard safety pass to strip markdown formatting wrapper variations if the model appends them
             responseText = responseText.replace(/```html/g, "").replace(/
 ```/g, "");
             
             display.innerHTML = `
-                <h2 style="margin-top:0; border-bottom: 1px solid #334155; padding-bottom: 10px; color: #fff;">${raceName} - Live Model Run</h2>
+                <h3 style="margin-top:0; border-bottom: 1px solid #24344d; padding-bottom: 8px; color: #fff; font-size: 16px;">${raceName}</h3>
                 ${responseText}
             `;
-            statusLabel.innerText = "RUN COMPLETE";
+            statusLabel.innerText = "COMPLETE";
             statusLabel.style.color = "#64748b";
         } catch (e) {
             display.innerHTML = `
-                <div style="color: #f87171; padding: 20px; background: #451a03; border: 1px solid #7f1d1d; border-radius: 8px;">
-                    <h3>⚠️ Processing Fault</h3>
-                    <p>${e.message}</p>
+                <div style="color: #f87171; padding: 15px; background: #451a03; border: 1px solid #7f1d1d; border-radius: 8px; font-size: 14px;">
+                    <b>Processing Fault</b><br>${e.message}
                 </div>
             `;
-            statusLabel.innerText = "SYSTEM FAULT";
+            statusLabel.innerText = "FAULT";
             statusLabel.style.color = "#f87171";
         }
     };
 </script>
-
 </body>
 </html>
